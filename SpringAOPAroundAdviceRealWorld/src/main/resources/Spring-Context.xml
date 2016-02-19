@@ -1,0 +1,44 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans-2.5.xsd 
+	http://www.springframework.org/schema/context 
+	http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+	<context:annotation-config />
+
+	<!-- Target class -->
+	<bean id="csTarget" class="com.manish.javadev.services.impl.CustomerServiceImpl" />
+	<bean id="asTarget" class="com.manish.javadev.services.impl.AccountServiceImpl" />
+
+	<!-- Advice classes -->
+	<bean id="methodThrow" class="com.manish.javadev.aop.MethodThrow" />
+	<bean id="methodAround" class="com.manish.javadev.aop.MethodAround" />
+
+	<!-- Middle level Services -->
+	<bean id="securityService" class="com.manish.javadev.aspect.SecurityService" />
+	<bean id="logService" class="com.manish.javadev.aspect.LogService" />
+	<bean id="txnService" class="com.manish.javadev.aspect.TransactionService" />
+
+	<!-- ProxyFactoryBean configured here -->
+	<bean id="baseProxy" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="interceptorNames">
+			<list>
+				<value>methodThrow</value>
+				<value>methodAround</value>
+			</list>
+		</property>
+	</bean>
+
+	<!-- Here is the proxy of target class -->
+	<bean id="asProxy" parent="baseProxy">
+		<property name="proxyInterfaces" value="com.manish.javadev.services.AccountService" />
+		<property name="target" ref="asTarget" />
+	</bean>
+
+	<bean id="csProxy" parent="baseProxy">
+		<property name="targetClass" value="com.manish.javadev.services.CustomerService" />
+		<property name="target" ref="csTarget" />
+	</bean>
+</beans>
